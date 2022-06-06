@@ -43,35 +43,25 @@ try:
   );""")
 except RuntimeError:
   print(RuntimeError)
-
-
 print("people created...")
 
-
-try:
-  connection.execute('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE people; TRUNCATE TABLE places; SET FOREIGN_KEY_CHECKS = 1;')
-except RuntimeError:
-  print(RuntimeError)
-
-print("truncated tables...")
-
-ex_places = sqlalchemy.schema.Table('places', metadata, autoload=True, autoload_with=engine)
+places = sqlalchemy.schema.Table('places', metadata, autoload=True, autoload_with=engine)
 with open('/data/places.csv') as csv_file:
   reader = csv.reader(csv_file)
   next(reader)
   for r in reader:
-    connection.execute(ex_places.insert().values(city = r[0],county=r[1],country=r[2]))
+    connection.execute(places.insert().values(city = r[0],county=r[1],country=r[2]))
 print("loaded places data...")
 
 
-ex_people = sqlalchemy.schema.Table('people', metadata, autoload=True, autoload_with=engine)
+people = sqlalchemy.schema.Table('people', metadata, autoload=True, autoload_with=engine)
 with open('/data/people.csv') as csv_file:
   reader = csv.reader(csv_file)
   next(reader)
   for r in reader:
     a = connection.execute(f"select id from places where city = '{r[3]}'")
     results_as_dict = a.mappings().all()
-    connection.execute(ex_people.insert().values(given_name = r[0], family_name=r[1], date_of_birth=r[2], place_fk=results_as_dict[0]['id']))
+    connection.execute(people.insert().values(given_name = r[0], family_name=r[1], date_of_birth=r[2], place_fk=results_as_dict[0]['id']))
 print("loaded people data...")
 
 
